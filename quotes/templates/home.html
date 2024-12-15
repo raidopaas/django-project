@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock App</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-success">
+    <h1>Stock Tracker</h1>
+    <br/>
+    <form action="{% url 'home' %}" method="POST">
+        {% csrf_token %}
+        <label>Stock Symbol:</label>
+        <input type="text" name="stock_symbol" placeholder="Enter stock symbol">
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if api_data and api_data.data %}
+            <strong>{{ api_data.symbol }}</strong>: {{ api_data.data.0.amount }}$ | Date: {{ api_data.data.0.payment_date }} | Close: {{ latest_close_price }}$
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="symbol" value="{{ api_data.symbol }}">
+                <input type="hidden" name="dividend_amount" value="{{ api_data.data.0.amount }}">
+                <input type="hidden" name="payment_date" value="{{ api_data.data.0.payment_date }}">
+                <input type="hidden" name="latest_close_price" value="{{ latest_close_price }}">
+                <button type="submit">Save</button>
+            </form>
+    {% endif %}
+
+    <br/>
+
+    <h2 class="text-center my-4">Saved Stocks</h2>
+
+    <table class="table-success mx-auto" style="width: 60%;">
+      <thead>
+        <tr>
+          <th scope="col">Symbol</th>
+          <th scope="col">Close</th>
+          <th scope="col">Quarterly Dividend</th>
+          <th scope="col">Annual Dividend</th>
+          <th scope="col">Yield</th>
+          <th scope="col">Dividend Payment Date</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticker in database_tickers %}
+            <tr>
+                <td>{{ ticker.symbol }}</td>
+                <td>{{ ticker.last_closing_price }}$</td>
+                <td>{{ ticker.dividend_amount }}$</td>
+                <td>{{ ticker.annual_dividend }}$</td>
+                <td>{{ ticker.yield_percentage }}%</td>
+                <td>{{ ticker.date }}</td>
+                <td><a href="{% url 'delete' ticker.id %}" class="btn btn-info">Delete</a></td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
